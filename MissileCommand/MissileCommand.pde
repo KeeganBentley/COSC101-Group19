@@ -6,3 +6,16 @@ Controls:
 
 Sound effect source: 
 ******************************************************************************/
+
+
+//Initialise all variables
+
+
+void setup(){
+  //Assign variables 
+}
+
+
+void draw(){
+
+}
