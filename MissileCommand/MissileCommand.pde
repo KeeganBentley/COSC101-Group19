@@ -12,7 +12,7 @@ Sound effect source:
 
 
 void setup(){
-  //Assign variables 
+  //Assign jsu variables 
 }
 
 
