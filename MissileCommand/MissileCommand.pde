@@ -13,9 +13,13 @@ Sound effect source:
 
 void setup(){
   //Assign variables 
+  background(255);
+  size(1000, 750);
 }
 
 
 void draw(){
-
+background(255);
+fill(0);
+rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/20, height/30);
 }
