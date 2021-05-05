@@ -17,6 +17,16 @@ int time = 120; //used to determine how long between each missile falling
 int[] mags = {10, 10, 10};
 int magNum = 0;
 ArrayList<AntiMissile> antiMissiles = new ArrayList<AntiMissile>();
+PShape city;
+PShape cityHit;
+int cityWidth, cityHeight, blockWidth, score;
+float ground, x, y, yPosCity;
+
+float[] xPosCity;
+int[] cityHitCount;
+
+color cityCol = color(55, 155, 255);
+color baseCol = color(126, 0, 126);  //TODO: Set color to change on next level
 
 
 void setup()
