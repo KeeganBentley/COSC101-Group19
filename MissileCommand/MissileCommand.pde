@@ -9,13 +9,17 @@ Sound effect source:
 
 
 //Initialise all variables
-float[] enemyMissile_x;
-float[] enemyMissile_y;
+ArrayList<EnemyMissile> enemyMissiles = new ArrayList<EnemyMissile>(10);
+
+
 float[] xPosCity;
 float enemyMissileSpeed = 2;
 float ground, x, y, yPosCity;
-int levelTotal = 10; //will determine the amount of missiles falling each round
-int time = 120; //used to determine how long between each missile falling
+//will determine the amount of missiles falling each round
+int levelTotal = 10; 
+//used to determine how long between each missile falling
+int time = 120; 
+
 int[] mags = {10, 10, 10};
 int magNum = 0;
 int cityWidth, cityHeight, blockWidth, score;
@@ -37,8 +41,6 @@ void setup()
   noStroke();
   frameRate(60);
   
-  enemyMissile_x = new float[0];
-  enemyMissile_y = new float[0];
   
   ground = height * 0.85;
   cityHeight = height / 25;
@@ -99,25 +101,6 @@ void setCityHitShape(float[] bHitHeight){
 }
 
 
-void createMissile()
-{
-   enemyMissile_x = append(enemyMissile_x, random(width));
-   enemyMissile_y = append(enemyMissile_y, 0);
-}
-
-void missile_fall()
-{
-  for( int i = 0; i < enemyMissile_x.length; i++)
-     {
-       fill(255);
-       rect(enemyMissile_x[i], enemyMissile_y[i], 5, 25);
-       enemyMissile_y[i] += enemyMissileSpeed;
-       //creates a missile. currently falls from top of screen. need to figure out
-       //how to get this to aim at cities once they are added.
-     }
-}
-
-
 void mouseClicked() {
   mags[magNum] -= 1;
   if (mags[magNum] > 0) {
@@ -136,14 +119,8 @@ void draw()
   displayScore();  //TODO: is a placeholder
   
   rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/20, height/30);
-  //every 2 seconds this will update the x and y position for a new enemy missile
     
-  if(frameCount % time == 0) 
-  {
-    createMissile();
-  }
-  
-  missile_fall();
+  println(enemyMissiles.size());  
   
   //draw in graphics for ammo counters *NOTE* need to actually place these correctly
   if (mags[magNum] == 0) {
@@ -172,6 +149,19 @@ void draw()
     else {
       antiMissiles.remove(i);
     }
+  }
+  
+  
+  //every 2 seconds adds a new enemymissile to the arrayList   
+  if(frameCount % time == 0) {
+    if (enemyMissiles.size() < levelTotal)  {
+    enemyMissiles.add(new EnemyMissile());
+    }
+  }
+     
+  for (int i = 0; i < enemyMissiles.size(); i++)  {
+    EnemyMissile newMissile = enemyMissiles.get(i);
+    newMissile.update();
   }
   
 }
@@ -244,3 +234,24 @@ class AntiMissile {
     }
   }
 }
+
+class EnemyMissile {
+  float xPos;
+  float yPos;
+  float speed;
+  
+  EnemyMissile()  {
+    xPos = random(width);
+    yPos = 0;
+    speed = 1;
+  }
+  
+  void update()  {
+    fill(255);
+    rect(xPos, yPos, 5, 25);  
+    yPos += speed;
+  }
+}
+
+  
+  
