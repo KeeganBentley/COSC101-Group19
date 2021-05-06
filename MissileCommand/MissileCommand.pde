@@ -13,7 +13,6 @@ ArrayList<EnemyMissile> enemyMissiles = new ArrayList<EnemyMissile>(10);
 
 
 float[] xPosCity;
-float enemyMissileSpeed = 2;
 float ground, x, y, yPosCity;
 //will determine the amount of missiles falling each round
 int levelTotal = 10; 
@@ -114,13 +113,14 @@ void draw()
   background(0);
   fill(255);
   
+  println(mouseX);
+  
   drawBase();
   displayCity(xPosCity, yPosCity);
   displayScore();  //TODO: is a placeholder
   
   rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/20, height/30);
-    
-  println(enemyMissiles.size());  
+     
   
   //draw in graphics for ammo counters *NOTE* need to actually place these correctly
   if (mags[magNum] == 0) {
@@ -155,7 +155,7 @@ void draw()
   //every 2 seconds adds a new enemymissile to the arrayList   
   if(frameCount % time == 0) {
     if (enemyMissiles.size() < levelTotal)  {
-    enemyMissiles.add(new EnemyMissile());
+    enemyMissiles.add(new EnemyMissile(xPosCity[int(random(numCities))] + 10, yPosCity));
     }
   }
      
@@ -236,20 +236,28 @@ class AntiMissile {
 }
 
 class EnemyMissile {
-  float xPos;
-  float yPos;
-  float speed;
+  float xPos, yPos, endX, endY, speed;
+  double time, distance, xVelocity, yVelocity;
   
-  EnemyMissile()  {
+  EnemyMissile(float x, float y)  {
     xPos = random(width);
     yPos = 0;
+    endX = x;
+    endY = y;
     speed = 1;
+    distance = Math.sqrt((xPos - endX) * (xPos - endX) + (yPos - endY) * (yPos - endY));
+    time = distance / speed;
+    xVelocity = (endX - xPos)/time;
+    yVelocity = (endY - yPos)/time;
+    
   }
   
   void update()  {
+    
     fill(255);
     rect(xPos, yPos, 5, 25);  
-    yPos += speed;
+    yPos += yVelocity;
+    xPos += xVelocity;
   }
 }
 
