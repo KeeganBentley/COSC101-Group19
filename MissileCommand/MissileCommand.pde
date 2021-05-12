@@ -10,12 +10,13 @@ Sound effect source:
 
 //Initialise all variables
 ArrayList<EnemyMissile> enemyMissiles = new ArrayList<EnemyMissile>(10);
-
+ArrayList<AntiMissile> antiMissiles = new ArrayList<AntiMissile>();
 
 float[] xPosCity;
 float ground, x, y, yPosCity;
 //will determine the amount of missiles falling each round
 int levelTotal = 10; 
+int missilesThisLevel = 0;
 //used to determine how long between each missile falling
 int time = 120; 
 
@@ -23,7 +24,7 @@ int[] mags = {10, 10, 10};
 int magNum = 0;
 int cityWidth, cityHeight, blockWidth, score;
 int[] cityHitCount;
-ArrayList<AntiMissile> antiMissiles = new ArrayList<AntiMissile>();
+
 PShape city;
 PShape cityHit;
 
@@ -123,22 +124,7 @@ void draw()
      
   
   //draw in graphics for ammo counters *NOTE* need to actually place these correctly
-  if (mags[magNum] == 0) {
-    if (magNum < 2){
-      magNum += 1;
-    }
-    else {
-    println("OUT OF AMMO");
-    }
-  }
-  for (int i=0; i < mags.length; i++) {
-    if (mags[i] > 0) {
-      rect(20*(i+1), height - 30, 10, 10);
-    }
-  }
-  for (int i=0; i < mags[magNum]; i++){
-    rect (75, 10*(i+1), 5, 5);
-  }
+  drawAmmo();
   
   //Update all Anti-Missiles
   for (int i=0; i < antiMissiles.size(); i++) {
@@ -151,19 +137,66 @@ void draw()
     }
   }
   
-  
+  missileCollision();
   //every 2 seconds adds a new enemymissile to the arrayList   
   if(frameCount % time == 0) {
-    if (enemyMissiles.size() < levelTotal)  {
+    if (missilesThisLevel < levelTotal)  {
     enemyMissiles.add(new EnemyMissile(xPosCity[int(random(numCities))] + 10, yPosCity));
+    missilesThisLevel++;
     }
   }
      
   for (int i = 0; i < enemyMissiles.size(); i++)  {
-    EnemyMissile newMissile = enemyMissiles.get(i);
-    newMissile.update();
+    enemyMissiles.get(i).update();
   }
   
+}
+
+void drawAmmo() {
+  float ammoX = width/2 - 5;
+  float ammoY = height - 100;
+  int ammoCount = 0;
+  
+  if (mags[magNum] == 0) {
+    if (magNum < 2){
+      magNum += 1;
+    }
+    else {
+    //Maybe print on screen out of ammo
+    println("OUT OF AMMO");
+    }
+  }
+  for (int i=0; i < mags.length; i++) {
+    if (mags[i] > 0) {
+      rect(20*(i+1), height - 60, 10, 10);
+    }
+  }
+  for (int i=0; i < mags[magNum]; i++){
+    rect (ammoX, ammoY , 10, 5);
+    if (ammoCount == 0) {
+      ammoY += 10;
+      ammoX -= 10;
+    }
+    else if (ammoCount == 1) {
+      ammoX += 20;
+    }
+    else if (ammoCount == 2) {
+      ammoY += 10;
+      ammoX -= 30;
+    }
+    else if (ammoCount == 3 || ammoCount == 4) {
+      ammoX += 20;
+    }
+    else if (ammoCount == 5) {
+      ammoY += 10;
+      ammoX -= 50;
+    }
+    else {
+      ammoX += 20;
+    }
+    
+    ammoCount++;
+  }
 }
 
 
@@ -208,6 +241,36 @@ void displayScore() {
   fill(255);
   text(score, width/2, height*0.1);
 }
+//just to see how long the line is :P
+//*****************************************************************************
+//Missile and anti-missile collision
+//BUG: detecting missiles well out of range
+void missileCollision() {
+  for (int i=0; i < enemyMissiles.size(); i++) {
+    for (int j=0; j < antiMissiles.size(); j++) {
+      
+      //naming convention EN-enemy MIS-missile TL-TopLeft X-xAxisValue
+      float enMisTLX = enemyMissiles.get(i).xPos;
+      float enMisTLY = enemyMissiles.get(i).yPos;
+      float antiRad = antiMissiles.get(j).radius;
+      float antiX = antiMissiles.get(j).xPos;
+      float antiY = antiMissiles.get(j).yPos;
+      float enMisTRX = enMisTLX + enemyMissiles.get(i).missileWidth;
+      float enMisTRY = enMisTLY;
+      float enMisBLX = enMisTLX;
+      float enMisBLY = enMisTLY + enemyMissiles.get(i).missileHeight;
+      float enMisBRX = enMisTRX;
+      float enMisBRY = enMisBLY;
+      
+      if (dist(enMisTLX, enMisTLY, antiX, antiY) < antiRad || dist(enMisTRX, 
+        enMisTRY, antiX, antiY) < antiRad || dist(enMisBLX, enMisBLY, antiX, 
+        antiY) < antiRad || dist(enMisBRX, enMisBRY, antiX, antiY) < antiRad) {
+        
+          enemyMissiles.remove(i);
+      }   
+    }
+  }
+}
 
 
 class AntiMissile {
@@ -225,7 +288,7 @@ class AntiMissile {
     if (radius >= 10){
       circle(xPos, yPos, radius);
       radius += growth;
-      if (radius > 150){
+      if (radius > 75){
         growth *= -1;
       }
     }
@@ -238,6 +301,7 @@ class AntiMissile {
 class EnemyMissile {
   float xPos, yPos, endX, endY, speed;
   double time, distance, xVelocity, yVelocity;
+  int missileWidth, missileHeight;
   
   EnemyMissile(float x, float y)  {
     xPos = random(width);
@@ -249,13 +313,14 @@ class EnemyMissile {
     time = distance / speed;
     xVelocity = (endX - xPos)/time;
     yVelocity = (endY - yPos)/time;
-    
+    missileWidth = 5;
+    missileHeight = 25;
   }
   
   void update()  {
     
     fill(255);
-    rect(xPos, yPos, 5, 25);  
+    rect(xPos, yPos, missileWidth, missileHeight);  
     yPos += yVelocity;
     xPos += xVelocity;
   }
