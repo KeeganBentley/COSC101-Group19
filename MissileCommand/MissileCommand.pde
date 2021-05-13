@@ -12,7 +12,8 @@ Sound effect source:
 ArrayList<EnemyMissile> enemyMissiles = new ArrayList<EnemyMissile>(10);
 ArrayList<AntiMissile> antiMissiles = new ArrayList<AntiMissile>();
 
-float[] xPosCity;
+FloatList xPosCity;
+FloatList xPosHitCity;
 float ground, x, y, yPosCity;
 //will determine the amount of missiles falling each round
 int levelTotal = 10; 
@@ -24,9 +25,11 @@ int[] mags = {10, 10, 10};
 int magNum = 0;
 int cityWidth, cityHeight, blockWidth, score;
 int[] cityHitCount;
+int explosion_images = 17;
 
 PShape city;
 PShape cityHit;
+PImage[] explosion;
 
 final int numCities = 6;
 
@@ -46,7 +49,9 @@ void setup()
   cityHeight = height / 25;
   cityWidth = width / 20;
   yPosCity = ground;
-  xPosCity = new float[0];
+  xPosCity = new FloatList(0);
+  xPosHitCity = new FloatList(0);
+  explosion = new PImage[explosion_images];
   cityHitCount = new int[numCities];
   blockWidth = cityWidth / 8;
   
@@ -56,6 +61,7 @@ void setup()
   setCityPos();
   setCityShape(blockHeight);
   setCityHitShape(blockHitHeight);
+  createExplosion();
 
 }
 
@@ -63,9 +69,9 @@ void setup()
 void setCityPos(){
   for (int i = 0; i < numCities; i++) {  
     if (i < numCities/2 ) {
-      xPosCity = append(xPosCity, width * (i + 1) / 10 );
+      xPosCity.append(width * (i + 1) / 10 );
     } else {
-      xPosCity = append(xPosCity, width * (i + 3) / 10 + cityWidth);
+      xPosCity.append(width * (i + 3) / 10 + cityWidth);
     }
   }
 }
@@ -101,6 +107,14 @@ void setCityHitShape(float[] bHitHeight){
 }
 
 
+void createExplosion() {
+  for (int i = 1; i <= explosion.length; i++) {
+    String str = "data/" +i +".gif";
+    explosion[i-1] = loadImage(str);
+  }
+}
+
+
 void mouseClicked() {
   mags[magNum] -= 1;
   if (mags[magNum] > 0) {
@@ -117,7 +131,7 @@ void draw()
   println(mouseX);
   
   drawBase();
-  displayCity(xPosCity, yPosCity);
+  displayCity(xPosCity, yPosCity, xPosHitCity);
   displayScore();  //TODO: is a placeholder
   
   rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/20, height/30);
@@ -138,10 +152,12 @@ void draw()
   }
   
   missileCollision();
+  cityCollision();
+  
   //every 2 seconds adds a new enemymissile to the arrayList   
   if(frameCount % time == 0) {
     if (missilesThisLevel < levelTotal)  {
-    enemyMissiles.add(new EnemyMissile(xPosCity[int(random(numCities))] + 10, yPosCity));
+    enemyMissiles.add(new EnemyMissile(xPosCity.get(int(random(xPosCity.size()))) + 10, yPosCity));
     missilesThisLevel++;
     }
   }
@@ -227,10 +243,20 @@ void drawBase() {
 }
 
 
-void displayCity(float[] xPosCity, float yPosCity) {
-  for (int i = 0; i < xPosCity.length; i++) {
-      shape(city, xPosCity[i], yPosCity);
+void displayCity(FloatList xPosCity, float yPosCity, FloatList xPosHitCity) {
+  for (int i = 0; i < xPosCity.size(); i++) {
+      shape(city, xPosCity.get(i), yPosCity);
   }
+  
+  for (int i = 0; i < xPosHitCity.size(); i++) {
+      shape(cityHit, xPosHitCity.get(i), yPosCity);
+  } 
+  
+}
+
+
+void explodeAt(float x, float y, int frame) {
+  image(explosion[frame], x, y-50);
 }
 
 
@@ -267,7 +293,58 @@ void missileCollision() {
         antiY) < antiRad || dist(enMisBRX, enMisBRY, antiX, antiY) < antiRad) {
         
           enemyMissiles.remove(i);
+          score += 10;
       }   
+    }
+  }
+}
+
+
+void cityCollision() { 
+  for (int i=0; i < enemyMissiles.size(); i++) {
+    for (int j=0; j < xPosCity.size(); j++) {
+      
+      //naming convention EN-enemy MIS-missile TL-TopLeft X-xAxisValue
+      float enMisTLX = enemyMissiles.get(i).xPos;
+      float enMisTLY = enemyMissiles.get(i).yPos;
+      float enMisTRX = enMisTLX + enemyMissiles.get(i).missileWidth;
+      float enMisTRY = enMisTLY;
+      float enMisBLX = enMisTLX;
+      float enMisBLY = enMisTLY + enemyMissiles.get(i).missileHeight;
+      float enMisBRX = enMisTRX;
+      float enMisBRY = enMisBLY;
+      
+      //removes missile ones it hits groud
+      if(enMisBLY >= ground || enMisBRY >= ground) {
+        enemyMissiles.remove(i);         
+      }
+      
+      //tests city collision
+      if ((enMisBRX >= xPosCity.get(j) && (enMisBRX <= xPosCity.get(j) + cityWidth)) &&
+         ((enMisBRY >= yPosCity - cityHeight) && enMisBRY <= yPosCity) &&
+         
+          (enMisBLX >= xPosCity.get(j) && (enMisBLX <= xPosCity.get(j) + cityWidth)) &&
+         ((enMisBLY >= yPosCity - cityHeight) && enMisBLY <= yPosCity) ||
+         
+          (enMisTLX >= xPosCity.get(j) && (enMisTLX <= xPosCity.get(j) + cityWidth)) &&
+         ((enMisTLY >= yPosCity - cityHeight) && enMisTLY <= yPosCity) &&
+         
+          (enMisTRX >= xPosCity.get(j) && (enMisTRX <= xPosCity.get(j) + cityWidth)) &&
+         ((enMisTRY >= yPosCity - cityHeight) && enMisTRY <= yPosCity)) {
+
+          
+         //explosion - need to discuss still to fix up
+         if  ( xPosCity.size() < explosion_images && frameCount%4 == 0) {
+               explodeAt(xPosCity.get(j), yPosCity - cityHeight, xPosCity.size()+1);
+         } else if ( xPosCity.size() < explosion_images) {
+               explodeAt(xPosCity.get(j), yPosCity - cityHeight, xPosCity.size());
+         }
+
+         xPosHitCity.append(xPosCity.get(j));   
+         xPosCity.remove(j);
+         enemyMissiles.remove(i); 
+
+      }     
     }
   }
 }
