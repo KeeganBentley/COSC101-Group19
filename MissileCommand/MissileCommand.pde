@@ -121,7 +121,12 @@ void draw()
 }
 
 
-//TODO:antiMissiles stops at level 2 second half way through (need to fix)
+//TODO:antiMissiles stops firing at level 2 second half way (need to fix)
+/*
+  Purpose: Resets variables for next level and calculates score
+  Args: None
+  Return: None
+*/
 void nextLevel(){
   if (enemyMissiles.size() == 0 && missilesThisLevel == levelTotal) {
     for (int j = 0; j < xPosCity.size(); j++) {
@@ -135,18 +140,23 @@ void nextLevel(){
       mags[k] = 10;
     }
     
-    //resets 
+    //resets variables
     xPosCity.clear();
     xPosHitCity.clear();
     setCityPos();
     baseCol = color(int(random(255)),int(random(255)),int(random(255)));
     
     missilesThisLevel = 0;
-    levelNumber++;   
+    levelNumber++; 
   }
 }
 
 
+/*
+  Purpose: Detects missile collision with the anti missiles and cities.
+  Args: None
+  Return: None
+*/
 void collisionDetect() { 
   ArrayList<EnemyMissile> enemyMissilesCopy = enemyMissiles; 
   for (int i=0; i < enemyMissiles.size(); i++) {
@@ -257,6 +267,8 @@ void displayScore() {
   textAlign(CENTER);
   fill(255);
   text(score, width/2, height*0.1);
+  textSize(18);
+  text("Level "+levelNumber, width/2, height-10);
 }
 
 /*
@@ -268,6 +280,7 @@ void drawAmmo() {
   float ammoX = width/2 - 5;
   float ammoY = height - 100;
   int ammoCount = 0;
+  fill(0);
 
   if (mags[magNum] == 0) {
     if (magNum < 2) {
