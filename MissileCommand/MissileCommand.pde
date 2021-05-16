@@ -6,7 +6,7 @@
  
  Sound effect source: 
  ******************************************************************************/
-
+import processing.sound.*;
 ArrayList<EnemyMissile> enemyMissiles = new ArrayList<EnemyMissile>();
 ArrayList<AntiMissile> antiMissiles = new ArrayList<AntiMissile>();
 
@@ -29,6 +29,7 @@ float ground, x, y, yPosCity;
 int cityWidth, cityHeight, blockWidth, score;
 int explosion_images = 17;
 final int numCities = 6;
+SoundFile explosionSound, missileSound, missileLaunch;
 
 color cityCol = color(55, 155, 255);
 color baseCol = color(126, 0, 126);  //TODO: Set color to change on next level
@@ -48,7 +49,13 @@ void setup()
   xPosHitCity = new FloatList(0);
   explosion = new PImage[explosion_images];
   blockWidth = cityWidth / 8;
-
+  explosionSound = new SoundFile(this, "explosion.mp3");
+  explosionSound.amp(0.05);
+  missileSound = new SoundFile(this, "spaceMissile.wav");
+  missileSound.amp(0.1);
+  missileLaunch = new SoundFile(this, "missileLaunch.wav");
+  explosionSound.amp(0.3);
+  
   //City block height ratio relative to city height
   float[] blockHeight = {0, 0.35, 0.65, 1, 0.75, 0.55, 0.85, 1, 0.35, 0};
   float[] blockHitHeight = {0, 0.10, 0.20, 0.20, 0.10, 0.20, 0.20, 0.1, 0.20, 0};
@@ -62,7 +69,6 @@ void setup()
 
 void draw()
 {
-  if(frameCount%60==0) {println("Current FR: "+frameRate);}
   background(0);
   fill(255);
 
@@ -70,7 +76,7 @@ void draw()
   displayCity(xPosCity, yPosCity, xPosHitCity);
   displayScore();  
 
-  rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/20, height/30);
+  rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/30, height/40);
 
 
   //draw in graphics for ammo counters *NOTE* need to actually place these correctly
@@ -95,6 +101,7 @@ void draw()
   if (frameCount % time == 0) {
     if (missilesThisLevel < levelTotal) {
       enemyMissiles.add(new EnemyMissile(xPosCity.get(int(random(xPosCity.size()))) + 10, yPosCity));
+      missileSound.play();
       missilesThisLevel++;
     }
   }
@@ -108,16 +115,17 @@ void draw()
 void collisionDetect() { 
   ArrayList<EnemyMissile> enemyMissilesCopy = enemyMissiles; 
   for (int i=0; i < enemyMissiles.size(); i++) {
-      float enMisTLX = enemyMissiles.get(i).xPos;
-      float enMisTLY = enemyMissiles.get(i).yPos;
-      float enMisTRX = enMisTLX + enemyMissiles.get(i).missileWidth;
-      float enMisTRY = enMisTLY;
-      float enMisBLX = enMisTLX;
-      float enMisBLY = enMisTLY + enemyMissiles.get(i).missileHeight;
-      float enMisBRX = enMisTRX;
-      float enMisBRY = enMisBLY;
+    //naming convention EN-enemy MIS-missile TL-TopLeft X-xAxisValue
+    float enMisTLX = enemyMissiles.get(i).xPos;
+    float enMisTLY = enemyMissiles.get(i).yPos;
+    float enMisTRX = enMisTLX + enemyMissiles.get(i).missileWidth;
+    float enMisTRY = enMisTLY;
+    float enMisBLX = enMisTLX;
+    float enMisBLY = enMisTLY + enemyMissiles.get(i).missileHeight;
+    float enMisBRX = enMisTRX;
+    float enMisBRY = enMisBLY;
+    
     for (int j=0; j < antiMissiles.size(); j++) {
-      //naming convention EN-enemy MIS-missile TL-TopLeft X-xAxisValue
       float antiRad = antiMissiles.get(j).radius;
       float antiX = antiMissiles.get(j).xPos;
       float antiY = antiMissiles.get(j).yPos;
@@ -160,15 +168,15 @@ void collisionDetect() {
                         xPosCity.size());
           }
 //*******************************************************************************
-  
+          explosionSound.play();
           xPosHitCity.append(xPosCity.get(j));   
           xPosCity.remove(j);
           enemyMissilesCopy.remove(i);
         }
       }
-    }
-    if (enMisBRY > ground) {
-      enemyMissilesCopy.remove(i);
+      if (enMisBRY > ground) {
+        enemyMissilesCopy.remove(i);
+      }
     }
   }
   enemyMissiles = enemyMissilesCopy;
@@ -313,8 +321,9 @@ void explodeAt(float x, float y, int frame) {
 */
 void mouseClicked() {
   mags[magNum] -= 1;
-  if (mags[magNum] > 0) {
+  if (mags[magNum] >= 0) {
     antiMissiles.add(new AntiMissile(mouseX, mouseY));
+    missileLaunch.play();
   }
 }
 
@@ -377,15 +386,14 @@ void setCityShape(float[] bHeight) {
   Purpose: Sets cordinates and methods for antiMissiles
 */
 class AntiMissile {
-  float xPos, yPos;
-  int radius, growth;
+  float xPos, yPos, radius, growth;
   boolean status;
   
   AntiMissile (float x, float y) {
     xPos = x;
     yPos = y;
     radius = 10;
-    growth = 1;
+    growth = 0.5;
     status = true;
   }
   
@@ -400,7 +408,7 @@ class AntiMissile {
       circle(xPos, yPos, radius);
       radius += growth;
       
-      if (radius > 75) {
+      if (radius > 50) {
         growth *= -1;
       }
       
