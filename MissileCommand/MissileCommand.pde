@@ -7,7 +7,7 @@
  Sound effect source: 
  ******************************************************************************/
 
-ArrayList<EnemyMissile> enemyMissiles = new ArrayList<EnemyMissile>(10);
+ArrayList<EnemyMissile> enemyMissiles = new ArrayList<EnemyMissile>();
 ArrayList<AntiMissile> antiMissiles = new ArrayList<AntiMissile>();
 
 //Will determine the amount of missiles falling each round
@@ -60,99 +60,15 @@ void setup()
 }
 
 
-/*
-  Purpose: Sets and appends x-cordinates for cities
-  Args: None
-  Return: None
-*/
-void setCityPos() {
-  for (int i = 0; i < numCities; i++) {  
-    if (i < numCities/2 ) {
-      xPosCity.append(width * (i + 1) / 10 );
-    } else {
-      xPosCity.append(width * (i + 3) / 10 + cityWidth);
-    }
-  }
-}
-
-
-/*
-  Purpose: Draws the city shape
-  Args: bHeight An array of ratios for building heights
-  Return: None
-*/
-void setCityShape(float[] bHeight) { 
-  city = createShape();
-  city.setFill(cityCol);
-  city.beginShape();
-  city.noStroke();
-
-  for (int i = 0; i < bHeight.length-1; i++) {
-    city.vertex(x + i * blockWidth, y - bHeight[i] * cityHeight);
-    city.vertex(x + i * blockWidth, y - bHeight[i+1] * cityHeight);
-  }
-
-  city.endShape(CLOSE);
-}
-
-
-/*
-  Purpose: Draws the hit city shape
-  Args: bHeight An array of ratios for building heights
-  Return: None
-*/
-void setCityHitShape(float[] bHitHeight) { 
-  cityHit = createShape();
-  cityHit.setFill(cityCol);
-  cityHit.beginShape();
-  cityHit.noStroke();
-
-  for (int i = 0; i < bHitHeight.length-1; i++) {
-    cityHit.vertex(x + i * blockWidth, y - bHitHeight[i] * cityHeight);
-    cityHit.vertex(x + i * blockWidth, y - bHitHeight[i+1] * cityHeight);
-  }
-
-  cityHit.endShape(CLOSE);
-}
-
-
-/*
-  Purpose: Loads the explosion images in an array
-  Args: None
-  Return: None
-*/
-void createExplosion() {
-  for (int i = 1; i <= explosion.length; i++) {
-    String str = "data/" +i +".gif";
-    explosion[i-1] = loadImage(str);
-  }
-}
-
-
-/*
-  Purpose: Creates a missile and adds location to array as 
-  mouse is clicked
-  Args: None
-  Return: None
-*/
-void mouseClicked() {
-  mags[magNum] -= 1;
-  if (mags[magNum] > 0) {
-    antiMissiles.add(new AntiMissile(mouseX, mouseY));
-  }
-}
-
-
 void draw()
 {
+  if(frameCount%60==0) {println("Current FR: "+frameRate);}
   background(0);
   fill(255);
 
-  println(mouseX);
-
   drawBase();
   displayCity(xPosCity, yPosCity, xPosHitCity);
-  displayScore();  //TODO: is a placeholder
+  displayScore();  
 
   rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/20, height/30);
 
@@ -161,18 +77,20 @@ void draw()
   drawAmmo();
 
   //Update all Anti-Missiles
+  ArrayList<AntiMissile> antiMissilesCopy = antiMissiles; 
   for (int i=0; i < antiMissiles.size(); i++) {
-    AntiMissile currentAnti = antiMissiles.get(i);
-    if (currentAnti.status == true) {
-      currentAnti.update();
+    if (antiMissiles.get(i).status == true) {
+      antiMissiles.get(i).update();
     } else {
-      antiMissiles.remove(i);
+      antiMissilesCopy.remove(i);
     }
   }
+  antiMissiles = antiMissilesCopy;
 
-  missileCollision();
-  cityCollision();
-
+  //missileCollision();
+  if (enemyMissiles.size() > 0) {
+    collisionDetect();
+  }
   //every 2 seconds adds a new enemymissile to the arrayList   
   if (frameCount % time == 0) {
     if (missilesThisLevel < levelTotal) {
@@ -186,6 +104,117 @@ void draw()
   }
 }
 
+
+void collisionDetect() { 
+  ArrayList<EnemyMissile> enemyMissilesCopy = enemyMissiles; 
+  for (int i=0; i < enemyMissiles.size(); i++) {
+      float enMisTLX = enemyMissiles.get(i).xPos;
+      float enMisTLY = enemyMissiles.get(i).yPos;
+      float enMisTRX = enMisTLX + enemyMissiles.get(i).missileWidth;
+      float enMisTRY = enMisTLY;
+      float enMisBLX = enMisTLX;
+      float enMisBLY = enMisTLY + enemyMissiles.get(i).missileHeight;
+      float enMisBRX = enMisTRX;
+      float enMisBRY = enMisBLY;
+    for (int j=0; j < antiMissiles.size(); j++) {
+      //naming convention EN-enemy MIS-missile TL-TopLeft X-xAxisValue
+      float antiRad = antiMissiles.get(j).radius;
+      float antiX = antiMissiles.get(j).xPos;
+      float antiY = antiMissiles.get(j).yPos;
+
+      if (dist(enMisTLX, enMisTLY, antiX, antiY) < antiRad || dist(enMisTRX, 
+        enMisTRY, antiX, antiY) < antiRad || dist(enMisBLX, enMisBLY, antiX, 
+        antiY) < antiRad || dist(enMisBRX, enMisBRY, antiX, antiY) < antiRad) {
+
+        enemyMissilesCopy.remove(i);
+        score += 10;
+      }
+    }
+    if (enemyMissiles.size() > 0) {
+      for (int j=0; j < xPosCity.size(); j++) {
+        //naming convention EN-enemy MIS-missile TL-TopLeft X-xAxisValue
+        //Tests city collision
+        if ((enMisBRX >= xPosCity.get(j) && 
+          (enMisBRX <= xPosCity.get(j) + cityWidth)) &&
+          ((enMisBRY >= yPosCity - cityHeight) && enMisBRY <= yPosCity) &&
+
+          (enMisBLX >= xPosCity.get(j) && 
+          (enMisBLX <= xPosCity.get(j) + cityWidth)) &&
+          ((enMisBLY >= yPosCity - cityHeight) && enMisBLY <= yPosCity) ||
+
+          (enMisTLX >= xPosCity.get(j) && 
+          (enMisTLX <= xPosCity.get(j) + cityWidth)) &&
+          ((enMisTLY >= yPosCity - cityHeight) && enMisTLY <= yPosCity) &&
+
+          (enMisTRX >= xPosCity.get(j) && 
+          (enMisTRX <= xPosCity.get(j) + cityWidth)) &&
+          ((enMisTRY >= yPosCity - cityHeight) && enMisTRY <= yPosCity)) {
+
+          
+//******TODO: explosion - doesn't work still to fix up**************************
+          if ( xPosCity.size() < explosion_images && frameCount%4 == 0) {
+              explodeAt(xPosCity.get(j), yPosCity - cityHeight, 
+                        xPosCity.size()+1);
+          } else if (xPosCity.size() < explosion_images) {
+              explodeAt(xPosCity.get(j), yPosCity - cityHeight, 
+                        xPosCity.size());
+          }
+//*******************************************************************************
+  
+          xPosHitCity.append(xPosCity.get(j));   
+          xPosCity.remove(j);
+          enemyMissilesCopy.remove(i);
+        }
+      }
+    }
+    if (enMisBRY > ground) {
+      enemyMissilesCopy.remove(i);
+    }
+  }
+  enemyMissiles = enemyMissilesCopy;
+}
+    
+
+/*
+  Purpose: Loads the explosion images in an array
+  Args: None
+  Return: None
+*/
+void createExplosion() {
+  for (int i = 1; i <= explosion.length; i++) {
+    String str = "data/" +i +".gif";
+    explosion[i-1] = loadImage(str);
+  }
+}
+
+/*
+  Purpose: Displays city and hit city shapes in specified locations
+  Args: xPosCity The x-cordinate of the city location
+        yPosCity The y-cordinate of the city and hit city location
+        xPosHitCity The x-cordinate of the hit city location
+  Return: None
+*/
+void displayCity(FloatList xPosCity, float yPosCity, FloatList xPosHitCity) {
+  for (int i = 0; i < xPosCity.size(); i++) {
+    shape(city, xPosCity.get(i), yPosCity);
+  }
+
+  for (int i = 0; i < xPosHitCity.size(); i++) {
+    shape(cityHit, xPosHitCity.get(i), yPosCity);
+  }
+}
+
+/*
+  Purpose: Displays the score at the top centre of screen
+  Args: None
+  Return: None
+*/
+void displayScore() {
+  textSize(32);
+  textAlign(CENTER);
+  fill(255);
+  text(score, width/2, height*0.1);
+}
 
 /*
   Purpose: Draws ammo and removes from display when used
@@ -265,25 +294,6 @@ void drawBase() {
   
 }
 
-
-/*
-  Purpose: Displays city and hit city shapes in specified locations
-  Args: xPosCity The x-cordinate of the city location
-        yPosCity The y-cordinate of the city and hit city location
-        xPosHitCity The x-cordinate of the hit city location
-  Return: None
-*/
-void displayCity(FloatList xPosCity, float yPosCity, FloatList xPosHitCity) {
-  for (int i = 0; i < xPosCity.size(); i++) {
-    shape(city, xPosCity.get(i), yPosCity);
-  }
-
-  for (int i = 0; i < xPosHitCity.size(); i++) {
-    shape(cityHit, xPosHitCity.get(i), yPosCity);
-  }
-}
-
-
 /*
   Purpose: Displays the images in the explosion array
   Args: x The x-cordinate of the explosion image
@@ -295,107 +305,73 @@ void explodeAt(float x, float y, int frame) {
   image(explosion[frame], x, y-50);
 }
 
-
 /*
-  Purpose: Displays the score at the top centre of screen
+  Purpose: Creates a missile and adds location to array as 
+  mouse is clicked
   Args: None
   Return: None
 */
-void displayScore() {
-  textSize(32);
-  textAlign(CENTER);
-  fill(255);
-  text(score, width/2, height*0.1);
+void mouseClicked() {
+  mags[magNum] -= 1;
+  if (mags[magNum] > 0) {
+    antiMissiles.add(new AntiMissile(mouseX, mouseY));
+  }
 }
 
-//BUG: detecting missiles well out of range
 
 /*
-  Purpose: Detects missile & antiMissile collision, removes it and adds score
+  Purpose: Draws the hit city shape
+  Args: bHeight An array of ratios for building heights
+  Return: None
+*/
+void setCityHitShape(float[] bHitHeight) { 
+  cityHit = createShape();
+  cityHit.setFill(cityCol);
+  cityHit.beginShape();
+  cityHit.noStroke();
+
+  for (int i = 0; i < bHitHeight.length-1; i++) {
+    cityHit.vertex(x + i * blockWidth, y - bHitHeight[i] * cityHeight);
+    cityHit.vertex(x + i * blockWidth, y - bHitHeight[i+1] * cityHeight);
+  }
+
+  cityHit.endShape(CLOSE);
+}
+
+/*
+  Purpose: Sets and appends x-cordinates for cities
   Args: None
   Return: None
 */
-void missileCollision() {
-  for (int i=0; i < enemyMissiles.size(); i++) {
-    for (int j=0; j < antiMissiles.size(); j++) {
-
-      //naming convention EN-enemy MIS-missile TL-TopLeft X-xAxisValue
-      float enMisTLX = enemyMissiles.get(i).xPos;
-      float enMisTLY = enemyMissiles.get(i).yPos;
-      float antiRad = antiMissiles.get(j).radius;
-      float antiX = antiMissiles.get(j).xPos;
-      float antiY = antiMissiles.get(j).yPos;
-      float enMisTRX = enMisTLX + enemyMissiles.get(i).missileWidth;
-      float enMisTRY = enMisTLY;
-      float enMisBLX = enMisTLX;
-      float enMisBLY = enMisTLY + enemyMissiles.get(i).missileHeight;
-      float enMisBRX = enMisTRX;
-      float enMisBRY = enMisBLY;
-
-      if (dist(enMisTLX, enMisTLY, antiX, antiY) < antiRad || dist(enMisTRX, 
-        enMisTRY, antiX, antiY) < antiRad || dist(enMisBLX, enMisBLY, antiX, 
-        antiY) < antiRad || dist(enMisBRX, enMisBRY, antiX, antiY) < antiRad) {
-
-        enemyMissiles.remove(i);
-        score += 10;
-      }
+void setCityPos() {
+  for (int i = 0; i < numCities; i++) {  
+    if (i < numCities/2 ) {
+      xPosCity.append(width * (i + 1) / 10 );
+    } else {
+      xPosCity.append(width * (i + 3) / 10 + cityWidth);
     }
   }
 }
 
 
-//TODO: incorporate to missile collision fuction******************
-void cityCollision() { 
-  for (int i=0; i < enemyMissiles.size(); i++) {
-    for (int j=0; j < xPosCity.size(); j++) {
+/*
+  Purpose: Draws the city shape
+  Args: bHeight An array of ratios for building heights
+  Return: None
+*/
+void setCityShape(float[] bHeight) { 
+  city = createShape();
+  city.setFill(cityCol);
+  city.beginShape();
+  city.noStroke();
 
-      //naming convention EN-enemy MIS-missile TL-TopLeft X-xAxisValue
-      float enMisTLX = enemyMissiles.get(i).xPos;
-      float enMisTLY = enemyMissiles.get(i).yPos;
-      float enMisTRX = enMisTLX + enemyMissiles.get(i).missileWidth;
-      float enMisTRY = enMisTLY;
-      float enMisBLX = enMisTLX;
-      float enMisBLY = enMisTLY + enemyMissiles.get(i).missileHeight;
-      float enMisBRX = enMisTRX;
-      float enMisBRY = enMisBLY;
-
-      //Tests city collision
-      if ((enMisBRX >= xPosCity.get(j) && 
-        (enMisBRX <= xPosCity.get(j) + cityWidth)) &&
-        ((enMisBRY >= yPosCity - cityHeight) && enMisBRY <= yPosCity) &&
-
-        (enMisBLX >= xPosCity.get(j) && 
-        (enMisBLX <= xPosCity.get(j) + cityWidth)) &&
-        ((enMisBLY >= yPosCity - cityHeight) && enMisBLY <= yPosCity) ||
-
-        (enMisTLX >= xPosCity.get(j) && 
-        (enMisTLX <= xPosCity.get(j) + cityWidth)) &&
-        ((enMisTLY >= yPosCity - cityHeight) && enMisTLY <= yPosCity) &&
-
-        (enMisTRX >= xPosCity.get(j) && 
-        (enMisTRX <= xPosCity.get(j) + cityWidth)) &&
-        ((enMisTRY >= yPosCity - cityHeight) && enMisTRY <= yPosCity)) {
-
-          
-//******TODO: explosion - doesn't work still to fix up**************************
-        if ( xPosCity.size() < explosion_images && frameCount%4 == 0) {
-            explodeAt(xPosCity.get(j), yPosCity - cityHeight, 
-                      xPosCity.size()+1);
-        } else if (xPosCity.size() < explosion_images) {
-            explodeAt(xPosCity.get(j), yPosCity - cityHeight, 
-                      xPosCity.size());
-        }
-//*******************************************************************************
-
-        xPosHitCity.append(xPosCity.get(j));   
-        xPosCity.remove(j);
-        enemyMissiles.remove(i);
-        
-      }
-    }
+  for (int i = 0; i < bHeight.length-1; i++) {
+    city.vertex(x + i * blockWidth, y - bHeight[i] * cityHeight);
+    city.vertex(x + i * blockWidth, y - bHeight[i+1] * cityHeight);
   }
-}
 
+  city.endShape(CLOSE);
+}
 
 /*
   Purpose: Sets cordinates and methods for antiMissiles
