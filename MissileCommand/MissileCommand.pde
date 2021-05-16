@@ -106,7 +106,7 @@ void draw()
   //every 2 seconds adds a new enemymissile to the arrayList   
   if (frameCount % time == 0) {
     if (missilesThisLevel < levelTotal) {
-      enemyMissiles.add(new EnemyMissile(xPosCity.get(int(random(xPosCity.size()))) + 10, yPosCity));
+      enemyMissiles.add(new EnemyMissile(xPosCity.get(int(random(xPosCity.size()))) + 20, yPosCity - 20));
       missileSound.play();
       missilesThisLevel++;
     }
@@ -366,7 +366,7 @@ void explodeAt(float x, float y, int frame) {
  Args: None
  Return: None
  */
-void mouseClicked() {
+void mousePressed() {
   mags[magNum] -= 1;
   if (mags[magNum] >= 0) {
     antiMissiles.add(new AntiMissile(mouseX, mouseY));
@@ -431,15 +431,25 @@ void setCityShape(float[] bHeight) {
   Purpose: Sets cordinates and methods for antiMissiles
 */
 class AntiMissile {
-  float xPos, yPos, radius, growth;
+  float xPos, yPos, radius, growth, endX, endY, speed;
+  double time, distance, xVelocity, yVelocity;
+  int missileWidth, missileHeight;
   boolean status;
+  
 
   AntiMissile (float x, float y) {
-    xPos = x;
-    yPos = y;
+    endX = x;
+    endY = y;
     radius = 10;
     growth = 0.5;
     status = true;
+    xPos = width/2;
+    yPos = height - 120;
+    speed = 3;
+    distance = Math.sqrt((xPos - endX) * (xPos - endX) + (yPos - endY) * (yPos - endY));
+    time = distance / speed;
+    xVelocity = (endX - xPos)/time;
+    yVelocity = (endY - yPos)/time;
   }
 
 
@@ -449,15 +459,23 @@ class AntiMissile {
     Return: None
   */
   void update() {
-    if (radius >= 10) {
-      circle(xPos, yPos, radius);
-      radius += growth;
+    fill(255); 
+    circle(xPos, yPos, radius);
+    yPos += yVelocity;
+    xPos += xVelocity;
+    
+    if (yPos <= endY)  {
+      yPos = endY;
+      xPos = endX;
+      if (radius >= 10) {
+        radius += growth;
 
-      if (radius > 50) {
-        growth *= -1;
+        if (radius > 50) {
+          growth *= -1;
+        }
+      } else {
+        status = false;
       }
-    } else {
-      status = false;
     }
   }
 }
