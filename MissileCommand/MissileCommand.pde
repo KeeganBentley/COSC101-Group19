@@ -334,10 +334,12 @@ void dropMissiles() {
  Return: None
  */
 void mousePressed() {
-  if (mags[magNum] >= 0 && mouseY < height - 120) {
+  if (mouseY < height - 120) {
     mags[magNum] -= 1;
-    antiMissiles.add(new AntiMissile(mouseX, mouseY));
-    missileLaunch.play();
+    if (mags[magNum] >= 0) {
+      antiMissiles.add(new AntiMissile(mouseX, mouseY));
+      missileLaunch.play();
+    }
   }
 }
 
