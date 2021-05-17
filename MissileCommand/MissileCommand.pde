@@ -10,6 +10,7 @@ import processing.sound.*;
 
 ArrayList<EnemyMissile> enemyMissiles = new ArrayList<EnemyMissile>();
 ArrayList<AntiMissile> antiMissiles = new ArrayList<AntiMissile>();
+ArrayList<Animation> explosions = new ArrayList<Animation>();
 
 //Will determine the amount of missiles falling each round
 int levelTotal = 10; 
@@ -30,7 +31,7 @@ FloatList xPosCity;
 FloatList xPosHitCity;
 float ground, x, y, yPosCity;
 int cityWidth, cityHeight, blockWidth, score;
-int explosion_images = 17;
+int explosion_images = 34;
 final int numCities = 6;
 SoundFile explosionSound, missileSound, missileLaunch;
 
@@ -115,7 +116,7 @@ void draw()
   for (int i = 0; i < enemyMissiles.size(); i++) {
     enemyMissiles.get(i).update();
   }
-  
+  runAnimations();
   nextLevel();
 
 }
@@ -151,6 +152,24 @@ void nextLevel(){
   }
 }
 
+/*
+  Purpose: Updates animations
+  Args: None
+  Return: None
+*/
+void runAnimations() {
+  ArrayList<Animation> explosionsCopy = explosions;
+  for (int i=0; i < explosions.size(); i++) {
+    if (explosions.get(i).status == true) {
+      explosions.get(i).display();
+      explosions.get(i).update();
+    }
+    else {
+      explosionsCopy.remove(i);
+    }
+  }
+  explosions = explosionsCopy;
+}
 
 /*
   Purpose: Detects missile collision with the anti missiles and cities.
@@ -204,7 +223,7 @@ void collisionDetect() {
           ((enMisTRY >= yPosCity - cityHeight) && enMisTRY <= yPosCity)) {
 
 
-          //******TODO: explosion - doesn't work still to fix up**************************
+          /******TODO: explosion - doesn't work still to fix up**************************
           if ( xPosCity.size() < explosion_images && frameCount%4 == 0) {
             explodeAt(xPosCity.get(j), yPosCity - cityHeight, 
               xPosCity.size()+1);
@@ -212,7 +231,9 @@ void collisionDetect() {
             explodeAt(xPosCity.get(j), yPosCity - cityHeight, 
               xPosCity.size());
           }
-          //*******************************************************************************
+          //******************************************************************************/
+          explosions.add(new Animation
+            (explosion, xPosCity.get(j), yPosCity - cityHeight));
           explosionSound.play();
           xPosHitCity.append(xPosCity.get(j));   
           xPosCity.remove(j);
@@ -355,10 +376,10 @@ void drawBase() {
  y The y-cordinate of the explosion image
  frame The number of image to display
  Return: None
- */
+ 
 void explodeAt(float x, float y, int frame) {
   image(explosion[frame], x, y-50);
-}
+}*/
 
 /*
   Purpose: Creates a missile and adds location to array as 
@@ -515,5 +536,33 @@ class EnemyMissile {
 
     yPos += yVelocity;
     xPos += xVelocity;
+  }
+}
+
+class Animation {
+  float x, y;
+  int index;
+  PImage[] images;
+  boolean status;
+  Animation(PImage[] images_, float x_, float y_) {
+    images = images_;
+    x = x_;
+    y = y_;
+    index=0;
+    status = true;
+  }
+  
+  void display() {
+    images[index].resize(cityWidth, 0);
+    image(images[index], x, y);
+  }
+  
+  void update() {
+    if (index < images.length-1) {
+      index ++;
+    }
+    else {
+      status = false;
+    }  
   }
 }
