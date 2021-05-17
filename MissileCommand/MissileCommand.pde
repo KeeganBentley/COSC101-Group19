@@ -25,6 +25,7 @@ boolean gameOver;
 //Will determine the amount of missiles falling each round
 int levelTotal = 10; 
 
+float missileSpeed = 1;
 int missilesThisLevel = 0;
 int levelNumber = 1;
 
@@ -350,7 +351,7 @@ void dropMissiles() {
   if (frameCount % time == 0) {
     if (missilesThisLevel < levelTotal) {
       if (xPosCity.size() > 0)  {
-      enemyMissiles.add(new EnemyMissile(xPosCity.get(int(random(xPosCity.size()))) + 20, yPosCity - 20));
+      enemyMissiles.add(new EnemyMissile(xPosCity.get(int(random(xPosCity.size()))) + 20, yPosCity - 20, missileSpeed));
       missileSound.play();
       missilesThisLevel++;
       }
@@ -397,6 +398,8 @@ void nextLevel(){
     //reset ammo and enemy missile counters
     magNum = 0;
     missilesThisLevel = 0;
+    missileSpeed += 0.25;
+    levelTotal += 2;
     levelNumber++; 
   }
 
