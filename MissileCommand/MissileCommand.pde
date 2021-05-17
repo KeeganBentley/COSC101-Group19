@@ -102,7 +102,11 @@ void draw()
   }
   runAnimations();
   nextLevel();
-
+  
+  if (xPosCity.size() == 0)
+  {
+     text("game over", width/2, height/2); 
+  }
 }
 
 /*
@@ -320,9 +324,11 @@ void dropMissiles() {
   //every 2 seconds adds a new enemymissile to the arrayList   
   if (frameCount % time == 0) {
     if (missilesThisLevel < levelTotal) {
+      if (xPosCity.size() > 0)  {
       enemyMissiles.add(new EnemyMissile(xPosCity.get(int(random(xPosCity.size()))) + 20, yPosCity - 20));
       missileSound.play();
       missilesThisLevel++;
+      }
     }
   }
 }
@@ -362,9 +368,9 @@ void nextLevel(){
     }
     
     //resets variables
-    xPosCity.clear();
-    xPosHitCity.clear();
-    setCityPos();
+    //xPosCity.clear();
+    //xPosHitCity.clear();
+    //setCityPos();
     baseCol = color(int(random(255)),int(random(255)),int(random(255)));
     
     missilesThisLevel = 0;
