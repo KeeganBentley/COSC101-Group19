@@ -5,18 +5,16 @@
  Attributes: 
    xPos: current x axis coordinate of the centre of the circle
    yPos: current y axis coordinate of the centre of the circle
-   radius:
-   growth:
-   endX:
-   endY:
-   speed:
-   time:
-   distance:
-   xVelocity:
-   yVelocity:
-   missileWidth:
-   missileLength:
-   status:
+   radius: radius of the anti missile
+   growth: rate of growth of the anti missile circle
+   endX: x axis coordinate of the target of the circle
+   endY: y axis coordinate of the target of the circle
+   speed: speed fo the missile
+   time: modifier for speed of the missile
+   distance: distance between current location and end loaction
+   xVelocity: velocity of the missile along the x axis
+   yVelocity: velocity of the missile along the y axis
+   status: variable to indication animation has ended
 */
 
 class AntiMissile {

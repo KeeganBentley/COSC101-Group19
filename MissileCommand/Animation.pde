@@ -2,10 +2,10 @@
  Authors: Carla Baldassara, Keegan Bentley, Caleb Cooper
  Purpose: 
  Attributes:
-   x:
-   y:
-   images:
-   status:
+   x: x axis position of the animation
+   y: y axis position of the animation
+   images: array of images that make up the animation
+   status: variable to indication animation has ended
 */
  
 class Animation {

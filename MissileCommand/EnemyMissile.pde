@@ -3,17 +3,17 @@
  Purpose: Defines an enemy Missile object with and includes a method to move
            the missile.
  Attributes: 
-   xPos: current x axis coordinate of the centre of the circle
-   yPos: current y axis coordinate of the centre of the circle
-   endX: 
-   endY:
-   speed:
-   time:
-   distance:
-   xVelocity:
-   yVelocity:
-   missileWidth:
-   missileHeight:
+   xPos: current x axis coordinate of the missile
+   yPos: current y axis coordinate of the missile
+   endX: x axis coordinate of the target of the missile
+   endY: y axis coordinate of the target of the missile
+   speed: speed fo the missile
+   time: modifier for speed of the missile
+   distance: distance between current location and end loaction
+   xVelocity: velocity of the missile along the x axis
+   yVelocity: velocity of the missile along the y axis
+   missileWidth: width of the missile
+   missileHeight: height of the missile
 */
 
 class EnemyMissile {

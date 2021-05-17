@@ -5,6 +5,14 @@
  Controls: 
  
  Sound effect source: 
+   explosionSound - Author: Iwiploppenisse 
+     link: https://freesound.org/people/Iwiploppenisse/sounds/156031/
+   missileSound - Author: Robinhood76
+     link: https://freesound.org/people/Robinhood76/sounds/273332/
+   missileLaunch - Author: bolkmar
+     link: https://freesound.org/people/bolkmar/sounds/455918/
+ 
+ Animation Source: COSC101 - Lecture 14
  ******************************************************************************/
 import processing.sound.*;
 
@@ -13,6 +21,7 @@ ArrayList<AntiMissile> antiMissiles = new ArrayList<AntiMissile>();
 ArrayList<Animation> explosions = new ArrayList<Animation>();
 
 boolean gameOver;
+
 //Will determine the amount of missiles falling each round
 int levelTotal = 10; 
 
@@ -371,6 +380,7 @@ void mousePressed() {
   Return: None
 */
 void nextLevel(){
+  //calculate score
   for (int j = 0; j < xPosCity.size(); j++) {
     score += 10;
   }
@@ -381,8 +391,10 @@ void nextLevel(){
     }
     mags[k] = 10;
   }
-    
+    //randomise colours for subsequent levels
     baseCol = color(int(random(255)),int(random(255)),int(random(255)));
+    
+    //reset ammo and enemy missile counters
     magNum = 0;
     missilesThisLevel = 0;
     levelNumber++; 
