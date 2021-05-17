@@ -83,33 +83,40 @@ void draw()
     fill(255);
     rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/30, height/40);
     
+    //Draw in game elements
     drawBase();
     displayCity(xPosCity, yPosCity, xPosHitCity);
     displayScore(); 
     drawAmmo();
     
-  
     //Update all Anti-Missiles
-    fill(int(random(255)));
     displayAntiMissiles();
-  
-    //missileCollision
+    
+    //Launch enemy missiles
+    dropMissiles();
+    
+    //Collision Detection
     if (enemyMissiles.size() > 0) {
       collisionDetect();
     }
     
-    dropMissiles();
-  
+    //Move enemy missiles
     for (int i = 0; i < enemyMissiles.size(); i++) {
       enemyMissiles.get(i).update();
     }
-    runAnimations();
-    nextLevel();
     
-    if (xPosCity.size() == 0)
-    {
-      gameOver = true;
+    //Handle explosion animations
+    runAnimations();
+    
+    //Test if the next level should run
+    if (enemyMissiles.size() == 0 && missilesThisLevel == levelTotal) {
+      nextLevel();
     }
+    //Test end game state
+    if (xPosCity.size() == 0)
+      {
+        gameOver = true;
+      }
     }
     else {
       background(255,0,0);
@@ -117,7 +124,6 @@ void draw()
       textSize(64);
       text("GAME OVER", width/2, height/2);
   }
- 
 }
 
 /*
@@ -365,24 +371,23 @@ void mousePressed() {
   Return: None
 */
 void nextLevel(){
-  if (enemyMissiles.size() == 0 && missilesThisLevel == levelTotal) {
-    for (int j = 0; j < xPosCity.size(); j++) {
-      score += 10;
-    }
+  for (int j = 0; j < xPosCity.size(); j++) {
+    score += 10;
+  }
     
-    for(int k = 0; k < mags.length; k++){
-      if(mags[k] >= 0) {
-        score += mags[k]*10;
-      }
-      mags[k] = 10;
+  for(int k = 0; k < mags.length; k++){
+    if(mags[k] >= 0) {
+      score += mags[k]*10;
     }
+    mags[k] = 10;
+  }
     
     baseCol = color(int(random(255)),int(random(255)),int(random(255)));
     magNum = 0;
     missilesThisLevel = 0;
     levelNumber++; 
   }
-}
+
 
 /*
   Purpose: Updates animations
