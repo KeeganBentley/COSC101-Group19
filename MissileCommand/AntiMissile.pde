@@ -33,7 +33,7 @@ class AntiMissile {
     status = true;
     xPos = width/2;
     yPos = height - 120;
-    speed = 3;
+    speed = 5;
     distance = Math.sqrt((xPos - endX) * (xPos - endX) + (yPos - endY) * 
       (yPos - endY));
     time = distance / speed;

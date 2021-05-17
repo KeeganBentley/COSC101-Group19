@@ -1,11 +1,11 @@
-/*
+/******************************************************************************
  Authors: Carla Baldassara, Keegan Bentley, Caleb Cooper
  Purpose: Defines an enemy Missile object with and includes a method to move
            the missile.
  Attributes: 
    xPos: current x axis coordinate of the centre of the circle
    yPos: current y axis coordinate of the centre of the circle
-   endX: 
+   endX:
    endY:
    speed:
    time:
@@ -14,7 +14,7 @@
    yVelocity:
    missileWidth:
    missileHeight:
-*/
+ ******************************************************************************/
 
 class EnemyMissile {
   float xPos, yPos, endX, endY, speed;
