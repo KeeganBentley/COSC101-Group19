@@ -36,7 +36,7 @@ final int numCities = 6;
 SoundFile explosionSound, missileSound, missileLaunch;
 
 color cityCol = color(55, 155, 255);
-color baseCol = color(126, 0, 126);  //TODO: Set color to change on next level
+color baseCol = color(126, 0, 126);  
 
 void setup()
 {
@@ -76,42 +76,26 @@ void setup()
 void draw()
 {
   background(0);
+  //Display user cursor
   fill(255);
-
+  rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/30, height/40);
+  
   drawBase();
   displayCity(xPosCity, yPosCity, xPosHitCity);
-  displayScore();  
-
-  rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/30, height/40);
-
-  //draw in graphics for ammo counters *NOTE* need to actually place these correctly
+  displayScore(); 
   drawAmmo();
+  
 
   //Update all Anti-Missiles
   fill(int(random(255)));
-  ArrayList<AntiMissile> antiMissilesCopy = antiMissiles; 
-  for (int i=0; i < antiMissiles.size(); i++) {
-    if (antiMissiles.get(i).status == true) {
-      antiMissiles.get(i).update();
-    } else {
-      antiMissilesCopy.remove(i);
-    }
-  }
-  antiMissiles = antiMissilesCopy;
+  displayAntiMissiles();
 
   //missileCollision
   if (enemyMissiles.size() > 0) {
     collisionDetect();
   }
   
-  //every 2 seconds adds a new enemymissile to the arrayList   
-  if (frameCount % time == 0) {
-    if (missilesThisLevel < levelTotal) {
-      enemyMissiles.add(new EnemyMissile(xPosCity.get(int(random(xPosCity.size()))) + 20, yPosCity - 20));
-      missileSound.play();
-      missilesThisLevel++;
-    }
-  }
+  dropMissiles();
 
   for (int i = 0; i < enemyMissiles.size(); i++) {
     enemyMissiles.get(i).update();
@@ -119,56 +103,6 @@ void draw()
   runAnimations();
   nextLevel();
 
-}
-
-
-//TODO:antiMissiles stops firing at level 2 second half way (need to fix)
-/*
-  Purpose: Resets variables for next level and calculates score
-  Args: None
-  Return: None
-*/
-void nextLevel(){
-  if (enemyMissiles.size() == 0 && missilesThisLevel == levelTotal) {
-    for (int j = 0; j < xPosCity.size(); j++) {
-      score += 10;
-    }
-    
-    for(int k = 0; k < mags.length; k++){
-      if(mags[k] >= 0) {
-        score += mags[k]*10;
-      }
-      mags[k] = 10;
-    }
-    
-    //resets variables
-    xPosCity.clear();
-    xPosHitCity.clear();
-    setCityPos();
-    baseCol = color(int(random(255)),int(random(255)),int(random(255)));
-    
-    missilesThisLevel = 0;
-    levelNumber++; 
-  }
-}
-
-/*
-  Purpose: Updates animations
-  Args: None
-  Return: None
-*/
-void runAnimations() {
-  ArrayList<Animation> explosionsCopy = explosions;
-  for (int i=0; i < explosions.size(); i++) {
-    if (explosions.get(i).status == true) {
-      explosions.get(i).display();
-      explosions.get(i).update();
-    }
-    else {
-      explosionsCopy.remove(i);
-    }
-  }
-  explosions = explosionsCopy;
 }
 
 /*
@@ -222,18 +156,8 @@ void collisionDetect() {
           (enMisTRX <= xPosCity.get(j) + cityWidth)) &&
           ((enMisTRY >= yPosCity - cityHeight) && enMisTRY <= yPosCity)) {
 
-
-          /******TODO: explosion - doesn't work still to fix up**************************
-          if ( xPosCity.size() < explosion_images && frameCount%4 == 0) {
-            explodeAt(xPosCity.get(j), yPosCity - cityHeight, 
-              xPosCity.size()+1);
-          } else if (xPosCity.size() < explosion_images) {
-            explodeAt(xPosCity.get(j), yPosCity - cityHeight, 
-              xPosCity.size());
-          }
-          //******************************************************************************/
           explosions.add(new Animation
-            (explosion, xPosCity.get(j), yPosCity - cityHeight));
+            (explosion, xPosCity.get(j), yPosCity - cityHeight*2));
           explosionSound.play();
           xPosHitCity.append(xPosCity.get(j));   
           xPosCity.remove(j);
@@ -276,6 +200,23 @@ void displayCity(FloatList xPosCity, float yPosCity, FloatList xPosHitCity) {
   for (int i = 0; i < xPosHitCity.size(); i++) {
     shape(cityHit, xPosHitCity.get(i), yPosCity);
   }
+}
+
+/*
+  Purpose: Displays and updates all anti-missiles
+  Args: None
+  Return: None
+*/
+void displayAntiMissiles() {
+  ArrayList<AntiMissile> antiMissilesCopy = antiMissiles; 
+  for (int i=0; i < antiMissiles.size(); i++) {
+    if (antiMissiles.get(i).status == true) {
+      antiMissiles.get(i).update();
+    } else {
+      antiMissilesCopy.remove(i);
+    }
+  }
+  antiMissiles = antiMissilesCopy;
 }
 
 /*
@@ -371,15 +312,20 @@ void drawBase() {
 }
 
 /*
-  Purpose: Displays the images in the explosion array
- Args: x The x-cordinate of the explosion image
- y The y-cordinate of the explosion image
- frame The number of image to display
+ Purpose: Controls the creation of new enemy missiles
+ Args: None
  Return: None
- 
-void explodeAt(float x, float y, int frame) {
-  image(explosion[frame], x, y-50);
-}*/
+ */
+void dropMissiles() {
+  //every 2 seconds adds a new enemymissile to the arrayList   
+  if (frameCount % time == 0) {
+    if (missilesThisLevel < levelTotal) {
+      enemyMissiles.add(new EnemyMissile(xPosCity.get(int(random(xPosCity.size()))) + 20, yPosCity - 20));
+      missileSound.play();
+      missilesThisLevel++;
+    }
+  }
+}
 
 /*
   Purpose: Creates a missile and adds location to array as 
@@ -388,11 +334,59 @@ void explodeAt(float x, float y, int frame) {
  Return: None
  */
 void mousePressed() {
-  mags[magNum] -= 1;
-  if (mags[magNum] >= 0) {
+  if (mags[magNum] >= 0 && mouseY < height - 120) {
+    mags[magNum] -= 1;
     antiMissiles.add(new AntiMissile(mouseX, mouseY));
     missileLaunch.play();
   }
+}
+
+/*
+  Purpose: Resets variables for next level and calculates score
+  Args: None
+  Return: None
+*/
+void nextLevel(){
+  if (enemyMissiles.size() == 0 && missilesThisLevel == levelTotal) {
+    for (int j = 0; j < xPosCity.size(); j++) {
+      score += 10;
+    }
+    
+    for(int k = 0; k < mags.length; k++){
+      if(mags[k] >= 0) {
+        score += mags[k]*10;
+      }
+      mags[k] = 10;
+    }
+    
+    //resets variables
+    xPosCity.clear();
+    xPosHitCity.clear();
+    setCityPos();
+    baseCol = color(int(random(255)),int(random(255)),int(random(255)));
+    
+    missilesThisLevel = 0;
+    levelNumber++; 
+  }
+}
+
+/*
+  Purpose: Updates animations
+  Args: None
+  Return: None
+*/
+void runAnimations() {
+  ArrayList<Animation> explosionsCopy = explosions;
+  for (int i=0; i < explosions.size(); i++) {
+    if (explosions.get(i).status == true) {
+      explosions.get(i).display();
+      explosions.get(i).update();
+    }
+    else {
+      explosionsCopy.remove(i);
+    }
+  }
+  explosions = explosionsCopy;
 }
 
 /*
@@ -444,125 +438,5 @@ void setCityShape(float[] bHeight) {
     city.vertex(x + i * blockWidth, y - bHeight[i] * cityHeight);
     city.vertex(x + i * blockWidth, y - bHeight[i+1] * cityHeight);
   }
-
   city.endShape(CLOSE);
-}
-
-/*
-  Purpose: Sets cordinates and methods for antiMissiles
-*/
-class AntiMissile {
-  float xPos, yPos, radius, growth, endX, endY, speed;
-  double time, distance, xVelocity, yVelocity;
-  int missileWidth, missileHeight;
-  boolean status;
-  
-
-  AntiMissile (float x, float y) {
-    endX = x;
-    endY = y;
-    radius = 10;
-    growth = 0.5;
-    status = true;
-    xPos = width/2;
-    yPos = height - 120;
-    speed = 3;
-    distance = Math.sqrt((xPos - endX) * (xPos - endX) + (yPos - endY) * (yPos - endY));
-    time = distance / speed;
-    xVelocity = (endX - xPos)/time;
-    yVelocity = (endY - yPos)/time;
-  }
-
-
-  /*
-    Purpose: Creates and displays oscillating antiMissile
-    Args: None
-    Return: None
-  */
-  void update() {
-    fill(255); 
-    circle(xPos, yPos, radius);
-    yPos += yVelocity;
-    xPos += xVelocity;
-    
-    if (yPos <= endY)  {
-      yPos = endY;
-      xPos = endX;
-      if (radius >= 10) {
-        radius += growth;
-
-        if (radius > 50) {
-          growth *= -1;
-        }
-      } else {
-        status = false;
-      }
-    }
-  }
-}
-
-
-/*
-  Purpose: Sets cordinates and methods for missiles
- */
-class EnemyMissile {
-  float xPos, yPos, endX, endY, speed;
-  double time, distance, xVelocity, yVelocity;
-  int missileWidth, missileHeight;
-
-  EnemyMissile(float x, float y) {
-    xPos = random(width);
-    yPos = 0;
-    endX = x;
-    endY = y;
-    speed = 1;
-    distance = Math.sqrt((xPos - endX) * (xPos - endX) + (yPos - endY) * (yPos - endY));
-    time = distance / speed;
-    xVelocity = (endX - xPos)/time;
-    yVelocity = (endY - yPos)/time;
-    missileWidth = 5;
-    missileHeight = 25;
-  }
-
-
-  /*
-    Purpose: Creates and displays and accelerates missile 
-   Args: None
-   Return: None
-   */
-  void update() {
-    fill(255,0, 0);
-    rect(xPos, yPos, missileWidth, missileHeight);  
-
-    yPos += yVelocity;
-    xPos += xVelocity;
-  }
-}
-
-class Animation {
-  float x, y;
-  int index;
-  PImage[] images;
-  boolean status;
-  Animation(PImage[] images_, float x_, float y_) {
-    images = images_;
-    x = x_;
-    y = y_;
-    index=0;
-    status = true;
-  }
-  
-  void display() {
-    images[index].resize(cityWidth, 0);
-    image(images[index], x, y);
-  }
-  
-  void update() {
-    if (index < images.length-1) {
-      index ++;
-    }
-    else {
-      status = false;
-    }  
-  }
 }
