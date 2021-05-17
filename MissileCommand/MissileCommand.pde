@@ -135,6 +135,7 @@ void draw()
       fill(0,255,0);
       textSize(64);
       text("GAME OVER", width/2, height/2);
+      text("Score:" + " " + score, width/2, height/2 + 80);
   }
 }
 
@@ -251,7 +252,7 @@ void displayCity(FloatList xPosCity, float yPosCity, FloatList xPosHitCity) {
     shape(cityHit, xPosHitCity.get(i), yPosCity);
   }
 }
-/****************************************************************************** 
+
 /*
   Purpose: Displays the score at the top centre of screen
   Args: None
@@ -389,23 +390,22 @@ void nextLevel(){
   for (int j = 0; j < xPosCity.size(); j++) {
     score += 10;
   }
-    
   for(int k = 0; k < mags.length; k++){
     if(mags[k] >= 0) {
       score += mags[k]*10;
     }
     mags[k] = 10;
   }
-    //randomise colours for subsequent levels
-    baseCol = color(int(random(255)),int(random(255)),int(random(255)));
+  //randomise colours for subsequent levels
+  baseCol = color(int(random(255)),int(random(255)),int(random(255)));
      
-    //reset ammo and enemy missile counters
-    magNum = 0;
-    missilesThisLevel = 0;
-    missileSpeed += 0.25;
-    levelTotal += 2;
-    levelNumber++; 
-  }
+  //reset ammo and enemy missile counters
+  magNum = 0;
+  missilesThisLevel = 0;
+  missileSpeed += 0.25;
+  levelTotal += 2;
+  levelNumber++; 
+}
 
 
 /*
