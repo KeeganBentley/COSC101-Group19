@@ -27,7 +27,8 @@ class EnemyMissile {
     endX = x;
     endY = y;
     speed = missileSpeed;
-    distance = Math.sqrt((xPos - endX) * (xPos - endX) + (yPos - endY) * (yPos - endY));
+    distance = Math.sqrt((xPos - endX) * (xPos - endX) + (yPos - endY)
+      * (yPos - endY));
     time = distance / speed;
     xVelocity = (endX - xPos)/time;
     yVelocity = (endY - yPos)/time;

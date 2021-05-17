@@ -76,7 +76,8 @@ void setup()
 
   //City block height ratio relative to city height
   float[] blockHeight = {0, 0.35, 0.65, 1, 0.75, 0.55, 0.85, 1, 0.35, 0};
-  float[] blockHitHeight = {0, 0.10, 0.20, 0.20, 0.10, 0.20, 0.20, 0.1, 0.20, 0};
+  float[] blockHitHeight = {0, 0.10, 0.20, 0.20, 0.10, 0.20, 0.20, 0.1, 
+    0.20, 0};
 
   setCityPos();
   setCityShape(blockHeight);
@@ -91,8 +92,9 @@ void draw()
     background(0);
     //Display user cursor
     fill(255);
-    rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/30, height/40);
-    
+    rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), 
+      width/30, height/40);
+   
     //Draw in game elements
     drawBase();
     displayCity(xPosCity, yPosCity, xPosHitCity);
@@ -217,23 +219,6 @@ void createExplosion() {
 }
 
 /*
-  Purpose: Displays city and hit city shapes in specified locations
-  Args: xPosCity The x-cordinate of the city location
-        yPosCity The y-cordinate of the city and hit city location
-        xPosHitCity The x-cordinate of the hit city location
-  Return: None
-*/
-void displayCity(FloatList xPosCity, float yPosCity, FloatList xPosHitCity) {
-  for (int i = 0; i < xPosCity.size(); i++) {
-    shape(city, xPosCity.get(i), yPosCity);
-  }
-
-  for (int i = 0; i < xPosHitCity.size(); i++) {
-    shape(cityHit, xPosHitCity.get(i), yPosCity);
-  }
-}
-
-/*
   Purpose: Displays and updates all anti-missiles
   Args: None
   Return: None
@@ -250,6 +235,23 @@ void displayAntiMissiles() {
   antiMissiles = antiMissilesCopy;
 }
 
+/*
+  Purpose: Displays city and hit city shapes in specified locations
+  Args: xPosCity The x-cordinate of the city location
+        yPosCity The y-cordinate of the city and hit city location
+        xPosHitCity The x-cordinate of the hit city location
+  Return: None
+*/
+void displayCity(FloatList xPosCity, float yPosCity, FloatList xPosHitCity) {
+  for (int i = 0; i < xPosCity.size(); i++) {
+    shape(city, xPosCity.get(i), yPosCity);
+  }
+
+  for (int i = 0; i < xPosHitCity.size(); i++) {
+    shape(cityHit, xPosHitCity.get(i), yPosCity);
+  }
+}
+/****************************************************************************** 
 /*
   Purpose: Displays the score at the top centre of screen
   Args: None
@@ -351,7 +353,9 @@ void dropMissiles() {
   if (frameCount % time == 0) {
     if (missilesThisLevel < levelTotal) {
       if (xPosCity.size() > 0)  {
-      enemyMissiles.add(new EnemyMissile(xPosCity.get(int(random(xPosCity.size()))) + 20, yPosCity - 20, missileSpeed));
+      enemyMissiles.add(new EnemyMissile(
+        xPosCity.get(int(random(xPosCity.size()))) + 20, 
+          yPosCity - 20, missileSpeed));
       missileSound.play();
       missilesThisLevel++;
       }
@@ -360,8 +364,8 @@ void dropMissiles() {
 }
 
 /*
-  Purpose: Creates a missile and adds location to array as 
- mouse is clicked
+ Purpose: Creates a missile and adds location to array as 
+   mouse is clicked
  Args: None
  Return: None
  */
@@ -394,7 +398,7 @@ void nextLevel(){
   }
     //randomise colours for subsequent levels
     baseCol = color(int(random(255)),int(random(255)),int(random(255)));
-    
+     
     //reset ammo and enemy missile counters
     magNum = 0;
     missilesThisLevel = 0;
