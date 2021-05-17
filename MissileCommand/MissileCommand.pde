@@ -12,6 +12,7 @@ ArrayList<EnemyMissile> enemyMissiles = new ArrayList<EnemyMissile>();
 ArrayList<AntiMissile> antiMissiles = new ArrayList<AntiMissile>();
 ArrayList<Animation> explosions = new ArrayList<Animation>();
 
+boolean gameOver;
 //Will determine the amount of missiles falling each round
 int levelTotal = 10; 
 
@@ -45,7 +46,8 @@ void setup()
   noStroke();
   frameRate(60);
   noCursor();
-
+  
+  gameOver = false;
   ground = height * 0.85;
   cityHeight = height / 25;
   cityWidth = width / 20;
@@ -75,38 +77,46 @@ void setup()
 
 void draw()
 {
-  background(0);
-  //Display user cursor
-  fill(255);
-  rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/30, height/40);
+  if (gameOver == false ) {
+    background(0);
+    //Display user cursor
+    fill(255);
+    rect(mouseX - ((width/20)/2), mouseY - ((height/20)/2), width/30, height/40);
+    
+    drawBase();
+    displayCity(xPosCity, yPosCity, xPosHitCity);
+    displayScore(); 
+    drawAmmo();
+    
   
-  drawBase();
-  displayCity(xPosCity, yPosCity, xPosHitCity);
-  displayScore(); 
-  drawAmmo();
+    //Update all Anti-Missiles
+    fill(int(random(255)));
+    displayAntiMissiles();
   
-
-  //Update all Anti-Missiles
-  fill(int(random(255)));
-  displayAntiMissiles();
-
-  //missileCollision
-  if (enemyMissiles.size() > 0) {
-    collisionDetect();
+    //missileCollision
+    if (enemyMissiles.size() > 0) {
+      collisionDetect();
+    }
+    
+    dropMissiles();
+  
+    for (int i = 0; i < enemyMissiles.size(); i++) {
+      enemyMissiles.get(i).update();
+    }
+    runAnimations();
+    nextLevel();
+    
+    if (xPosCity.size() == 0)
+    {
+      gameOver = true;
+    }
+    }
+    else {
+    background(255,0,0);
+    textSize(64);
+    text("GAME OVER", width/2, height/2);
   }
-  
-  dropMissiles();
-
-  for (int i = 0; i < enemyMissiles.size(); i++) {
-    enemyMissiles.get(i).update();
-  }
-  runAnimations();
-  nextLevel();
-  
-  if (xPosCity.size() == 0)
-  {
-     text("game over", width/2, height/2); 
-  }
+ 
 }
 
 /*
@@ -252,8 +262,7 @@ void drawAmmo() {
     if (magNum < 2) {
       magNum += 1;
     } else {
-      //Maybe print on screen out of ammo
-      println("OUT OF AMMO");
+      gameOver = true;
     }
   }
   for (int i=0; i < mags.length; i++) {
@@ -367,12 +376,8 @@ void nextLevel(){
       mags[k] = 10;
     }
     
-    //resets variables
-    //xPosCity.clear();
-    //xPosHitCity.clear();
-    //setCityPos();
     baseCol = color(int(random(255)),int(random(255)),int(random(255)));
-    
+    magNum = 0;
     missilesThisLevel = 0;
     levelNumber++; 
   }

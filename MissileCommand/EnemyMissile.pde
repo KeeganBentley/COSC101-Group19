@@ -5,7 +5,7 @@
  Attributes: 
    xPos: current x axis coordinate of the centre of the circle
    yPos: current y axis coordinate of the centre of the circle
-   endX:
+   endX: 
    endY:
    speed:
    time:
