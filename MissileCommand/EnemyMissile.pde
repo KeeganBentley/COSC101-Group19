@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  Authors: Carla Baldassara, Keegan Bentley, Caleb Cooper
  Purpose: Defines an enemy Missile object with and includes a method to move
            the missile.
@@ -14,7 +14,7 @@
    yVelocity:
    missileWidth:
    missileHeight:
- ******************************************************************************/
+*/
 
 class EnemyMissile {
   float xPos, yPos, endX, endY, speed;

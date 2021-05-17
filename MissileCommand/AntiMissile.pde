@@ -48,7 +48,7 @@ class AntiMissile {
     Return: None
   */
   void update() {
-    fill(255); 
+    fill(0,255,0); 
     circle(xPos, yPos, radius);
     yPos += yVelocity;
     xPos += xVelocity;
