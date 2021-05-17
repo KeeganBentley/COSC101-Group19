@@ -112,9 +112,10 @@ void draw()
     }
     }
     else {
-    background(255,0,0);
-    textSize(64);
-    text("GAME OVER", width/2, height/2);
+      background(255,0,0);
+      fill(0,255,0);
+      textSize(64);
+      text("GAME OVER", width/2, height/2);
   }
  
 }
